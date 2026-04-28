@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KhariSoch - Khari Baat, Seedhi Soch</title>
+<meta name="description" content="Daily Hindi thoughts, quotes, reality lines and sharp observations.">
+<meta name="keywords" content="KhariSoch, Hindi thoughts, motivational quotes, reality quotes, Hindi status">
+<style>
+:root{--bg:#050510;--neon:#00f7ff;--pink:#ff00d4;--txt:#fff;--muted:#aaa}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:radial-gradient(circle at top,#111,#050510 60%);color:var(--txt)}
+header{padding:30px;text-align:center;border-bottom:1px solid #1b1b3a;position:sticky;top:0;background:rgba(5,5,16,.8);backdrop-filter:blur(8px)}
+.logo{font-size:42px;font-weight:800;color:var(--neon);text-shadow:0 0 12px var(--neon),0 0 28px var(--neon)}
+.tag{color:var(--muted)}
+.wrap{max-width:1100px;margin:auto;padding:20px}
+.hero{display:grid;grid-template-columns:2fr 1fr;gap:20px}
+.card{background:#0b0b1f;border:1px solid #1f1f40;border-radius:18px;padding:20px;box-shadow:0 0 18px rgba(0,247,255,.15)}
+.glow{animation:pulse 2s infinite alternate}@keyframes pulse{from{box-shadow:0 0 8px rgba(0,247,255,.2)}to{box-shadow:0 0 28px rgba(255,0,212,.35)}}
+input,textarea{width:100%;padding:12px;margin:8px 0;background:#111;color:#fff;border:1px solid #333;border-radius:10px}
+button{padding:10px 14px;border:none;border-radius:10px;cursor:pointer;margin:4px;font-weight:700}
+.primary{background:var(--neon)}.danger{background:#ff4d4d}.edit{background:#ffd24d}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:20px}
+.quote{white-space:pre-line;font-size:18px;line-height:1.6}
+.small{font-size:13px;color:var(--muted)}
+a{color:var(--neon)}
+.hidden{display:none}
+footer{text-align:center;padding:30px;color:#888}
+@media(max-width:800px){.hero{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+<div class='logo'>KhariSoch</div>
+<div class='tag'>Daily Sharp Thoughts • Public Website • Neon Style</div>
+</header>
+<div class='wrap'>
+<section class='hero'>
+<div class='card glow'>
+<h2>Today's Thought</h2>
+<p>Har roz ek nayi khari baat. Seedha dil aur dimag par asar.</p>
+<div id='adminPanel' class='hidden'>
+<input id='title' placeholder='Thought title'>
+<textarea id='content' rows='6' placeholder='Apna thought likho...'></textarea>
+<input id='link' placeholder='Related website link (optional)'>
+<button class='primary' onclick='saveThought()'>Save</button>
+</div>
+<div id='loginBox'>
+<input type='password' id='pass' placeholder='Admin password'>
+<button class='primary' onclick='login()'>Admin Login</button>
+</div>
+</div>
+<div class='card'>
+<h3>Analytics</h3>
+<p>Total Visits: <span id='visits'></span></p>
+<p>Total Thoughts: <span id='count'></span></p>
+<p class='small'>Real analytics ke liye Google Analytics add karo.</p>
+</div>
+</section>
+<section>
+<h2>Latest Thoughts</h2>
+<div class='grid' id='list'></div>
+</section>
+</div>
+<footer>© 2026 KhariSoch</footer>
+<script>
+const ADMIN_PASSWORD='Happy@123';
+let editIndex=null;
+function boot(){
+let v=localStorage.getItem('ks_visits')||0;v++;localStorage.setItem('ks_visits',v);document.getElementById('visits').innerText=v;render();}
+function login(){const p=document.getElementById('pass').value;if(p===ADMIN_PASSWORD){document.getElementById('adminPanel').classList.remove('hidden');document.getElementById('loginBox').classList.add('hidden');localStorage.setItem('ks_admin','1');render();}else alert('Wrong password');}
+function getData(){return JSON.parse(localStorage.getItem('ks_data')||'[]')}
+function setData(d){localStorage.setItem('ks_data',JSON.stringify(d))}
+function saveThought(){let data=getData();const obj={title:title.value,content:content.value,link:link.value,date:new Date().toLocaleString()};if(editIndex!==null){data[editIndex]=obj;editIndex=null;}else data.unshift(obj);setData(data);title.value='';content.value='';link.value='';render();}
+function del(i){let data=getData();data.splice(i,1);setData(data);render();}
+function editThought(i){let d=getData()[i];title.value=d.title;content.value=d.content;link.value=d.link;editIndex=i;window.scrollTo(0,0)}
+function share(txt){if(navigator.share){navigator.share({title:'KhariSoch',text:txt,url:location.href})}else{navigator.clipboard.writeText(txt+' '+location.href);alert('Copied')}}
+function render(){const data=getData();document.getElementById('count').innerText=data.length;const admin=localStorage.getItem('ks_admin')==='1';list.innerHTML=data.map((x,i)=>`<div class='card'><h3>${x.title||'Thought'}</h3><div class='quote'>${x.content}</div><p class='small'>${x.date}</p>${x.link?`<p><a href='${x.link}' target='_blank'>Visit Link</a></p>`:''}<button class='primary' onclick="share(${JSON.stringify(x.content)})">Share</button>${admin?`<button class='edit' onclick='editThought(${i})'>Edit</button><button class='danger' onclick='del(${i})'>Delete</button>`:''}</div>`).join('');if(admin){adminPanel.classList.remove('hidden');loginBox.classList.add('hidden');}}
+boot();
+</script>
+</body>
+</html>
