@@ -58,14 +58,16 @@
     <div id='list'>Loading thoughts...</div>
 </div>
 
+<!-- Scripts properly linked -->
 <script src="https://gstatic.com"></script>
 <script src="https://gstatic.com"></script>
 
 <script>
+// Verified Config from your Firebase screenshots
 const firebaseConfig = {
   apiKey: "AIzaSyDGg1Vjg2kNVfuosdumF5fmAl-mP-GAk4I",
   authDomain: "://firebaseapp.com",
-  databaseURL: "https://firebaseio.com",
+  databaseURL: "https://kharisoch-ae2c8-default-rtdb.firebaseio.com",
   projectId: "kharisoch-ae2c8",
   storageBucket: "kharisoch-ae2c8.firebasestorage.app",
   messagingSenderId: "657836217172",
@@ -79,19 +81,25 @@ const db = firebase.database();
 let ADMIN_P = "Happy@123";
 let MASTER_P = "Master@786";
 
+// Fetching admin password from Firebase
 db.ref('settings').on('value', (s) => {
     const d = s.val();
     if(d) { 
         if(d.adminP) ADMIN_P = d.adminP; 
         if(d.masterP) MASTER_P = d.masterP; 
     }
+    // Change "Loading thoughts..." once connected
+    document.getElementById('list').innerHTML = '<h2>Latest Thoughts</h2><p>No thoughts yet.</p>';
 });
 
 function login() {
-    if(document.getElementById('mainPassInput').value === ADMIN_P) {
+    const pass = document.getElementById('mainPassInput').value;
+    if(pass === ADMIN_P) {
         document.getElementById('thoughtPanel').classList.remove('hidden');
         document.getElementById('auth-section').classList.add('hidden');
-    } else { alert("Wrong Admin Password!"); }
+    } else { 
+        alert("Wrong Admin Password!"); 
+    }
 }
 
 function openMaster() {
@@ -105,7 +113,11 @@ function saveThought() {
     const link = document.getElementById('tLink').value;
     if(!content) return alert("Write something!");
     db.ref('thoughts').push({ content, link, date: new Date().toLocaleString() })
-    .then(() => { alert("Thought Live!"); document.getElementById('tContent').value = ''; });
+    .then(() => { 
+        alert("Thought Live!"); 
+        document.getElementById('tContent').value = ''; 
+        document.getElementById('tLink').value = '';
+    });
 }
 
 function saveBiz() {
@@ -127,11 +139,15 @@ function changePasswords() {
 
 function logout() { location.reload(); }
 
+// Sync and show thoughts
 db.ref('thoughts').on('value', (snap) => {
     const data = snap.val();
     const list = document.getElementById('list');
     list.innerHTML = '<h2>Latest Thoughts</h2>';
-    if(!data) return;
+    if(!data) {
+        list.innerHTML += "<p>Abhi tak koi thought nahi hai.</p>";
+        return;
+    }
     Object.keys(data).reverse().forEach(id => {
         const x = data[id];
         list.innerHTML += `
