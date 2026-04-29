@@ -27,34 +27,28 @@
 <div class='wrap'>
     <div class="ad-space">Future Google Ads / Promotion Banner</div>
 
-    <!-- LOGIN SECTION -->
     <div class='card' id="auth-section">
         <h3>🔐 Admin Login</h3>
         <input type='password' id='mainPassInput' placeholder='Enter Admin Password'>
         <button class='btn-neon' onclick='login()'>Open Panel</button>
     </div>
 
-    <!-- POST PANEL -->
     <div id='thoughtPanel' class='hidden admin-box'>
         <h3 style="color:var(--neon)">📝 Post New Thought</h3>
         <textarea id='tContent' rows='4' placeholder='Aaj ki khari baat...'></textarea>
         <input id='tLink' placeholder='Promotion Link (Optional)'>
         <button class='btn-neon' onclick='saveThought()'>Publish Now</button>
-        
         <hr style="border:0.5px solid #333; margin:20px 0">
-        
         <input type='password' id='masterPassInput' placeholder='Enter Master Password'>
         <button class='btn-gold' onclick='openMaster()'>Open Business & Security</button>
         <button class='btn-red' onclick="logout()">Logout</button>
     </div>
 
-    <!-- MASTER PANEL -->
     <div id='masterPanel' class='hidden biz-box'>
         <h3 style="color:var(--gold)">💰 Business & Bank Manager</h3>
         <textarea id='bankData' rows='3' placeholder='Bank A/c, IFSC...'></textarea>
         <input id='upiData' placeholder='UPI ID'>
         <button class='btn-gold' onclick='saveBiz()'>Save Business Details</button>
-        
         <h3 style="color:var(--pink); margin-top:20px">⚙️ Change Passwords</h3>
         <input type='password' id='newAdminPass' placeholder='New Admin Password'>
         <input type='password' id='newMasterPass' placeholder='New Master Password'>
@@ -64,12 +58,10 @@
     <div id='list'>Loading thoughts...</div>
 </div>
 
-<!-- Scripts Fix: Added Proper Firebase SDKs -->
 <script src="https://gstatic.com"></script>
 <script src="https://gstatic.com"></script>
 
 <script>
-// Config Fix: Closed strings and objects properly
 const firebaseConfig = {
   apiKey: "AIzaSyDGg1Vjg2kNVfuosdumF5fmAl-mP-GAk4I",
   authDomain: "://firebaseapp.com",
@@ -87,7 +79,6 @@ const db = firebase.database();
 let ADMIN_P = "Happy@123";
 let MASTER_P = "Master@786";
 
-// Sync settings
 db.ref('settings').on('value', (s) => {
     const d = s.val();
     if(d) { 
@@ -97,16 +88,14 @@ db.ref('settings').on('value', (s) => {
 });
 
 function login() {
-    const input = document.getElementById('mainPassInput').value;
-    if(input === ADMIN_P) {
+    if(document.getElementById('mainPassInput').value === ADMIN_P) {
         document.getElementById('thoughtPanel').classList.remove('hidden');
         document.getElementById('auth-section').classList.add('hidden');
     } else { alert("Wrong Admin Password!"); }
 }
 
 function openMaster() {
-    const input = document.getElementById('masterPassInput').value;
-    if(input === MASTER_P) {
+    if(document.getElementById('masterPassInput').value === MASTER_P) {
         document.getElementById('masterPanel').classList.toggle('hidden');
     } else { alert("Wrong Master Password!"); }
 }
@@ -115,15 +104,8 @@ function saveThought() {
     const content = document.getElementById('tContent').value;
     const link = document.getElementById('tLink').value;
     if(!content) return alert("Write something!");
-    db.ref('thoughts').push({ 
-        content: content, 
-        link: link, 
-        date: new Date().toLocaleString() 
-    }).then(() => {
-        document.getElementById('tContent').value = ''; 
-        document.getElementById('tLink').value = '';
-        alert("Thought Live!");
-    });
+    db.ref('thoughts').push({ content, link, date: new Date().toLocaleString() })
+    .then(() => { alert("Thought Live!"); document.getElementById('tContent').value = ''; });
 }
 
 function saveBiz() {
@@ -137,39 +119,34 @@ function changePasswords() {
     const m = document.getElementById('newMasterPass').value;
     if(a && m) {
         db.ref('settings').set({ adminP: a, masterP: m }).then(() => {
-            alert("Passwords Changed! Refreshing...");
+            alert("Changed! Refreshing...");
             location.reload();
         });
-    } else { alert("Enter both new passwords!"); }
+    } else { alert("Enter both!"); }
 }
 
 function logout() { location.reload(); }
 
-// Render Thoughts
 db.ref('thoughts').on('value', (snap) => {
     const data = snap.val();
     const list = document.getElementById('list');
     list.innerHTML = '<h2>Latest Thoughts</h2>';
-    if(!data) {
-        list.innerHTML += "<p>No thoughts yet.</p>";
-        return;
-    }
+    if(!data) return;
     Object.keys(data).reverse().forEach(id => {
         const x = data[id];
-        const safeContent = x.content ? x.content.replace(/'/g, "\\'") : "";
         list.innerHTML += `
             <div class='quote-card'>
                 <p style="font-size:18px">${x.content}</p>
                 ${x.link ? `<a href="${x.link}" target="_blank" style="color:var(--pink)">Check Promotion 🔗</a>` : ''}
                 <div style="font-size:11px; color:#555; margin-top:10px">${x.date}</div>
-                <button class='btn-neon' style="width:auto; padding:5px 15px; margin-top:10px" onclick="share('${safeContent}')">Share</button>
+                <button class='btn-neon' style="width:auto; padding:5px 15px; margin-top:10px" onclick="share('${x.content.replace(/\n/g,' ')}')">Share</button>
             </div>`;
     });
 });
 
 function share(t) {
     navigator.clipboard.writeText(t + " - Read more on KhariSoch");
-    alert("Copied! Share it on WhatsApp.");
+    alert("Copied!");
 }
 </script>
 </body>
